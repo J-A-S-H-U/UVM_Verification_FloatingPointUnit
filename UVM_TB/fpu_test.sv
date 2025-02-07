@@ -15,18 +15,18 @@ class fpu_test extends uvm_test;
 
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
-        `uvm_info(get_name(), "Inside build phase", UVM_HIGH)
+        `uvm_info("fpu_test", "Inside build phase", UVM_HIGH)
      	 env=fpu_env::type_id::create("env",this);
     endfunction: build_phase
 
     function void connect_phase(uvm_phase phase);
         super.connect_phase(phase);
-        `uvm_info(get_name(), "Inside connect phase", UVM_HIGH)
+        `uvm_info("fpu_test", "Inside connect phase", UVM_HIGH)
     endfunction
 
     task run_phase(uvm_phase phase);
       super.run_phase(phase);
-      `uvm_info(get_name(), "Inside run phase", UVM_HIGH)
+      `uvm_info("fpu_test", "Inside run phase", UVM_HIGH)
       	
       phase.raise_objection(this);
 
@@ -34,11 +34,11 @@ class fpu_test extends uvm_test;
         rst_seq=fpu_rst_seq::type_id::create("rst_seq");
         rst_seq.start(env.agent.seqr);
       end
-      repeat(`TEST_COUNT) begin
+      repeat(`TESTS) begin
         main_seq=fpu_main_seq::type_id::create("main_seq");
         main_seq.start(env.agent.seqr);
       end
-      wait(env.scb.test_cnt==`TEST_COUNT);
+      wait(env.scb.test_cnt==`TESTS);
 
       phase.drop_objection(this);
         
