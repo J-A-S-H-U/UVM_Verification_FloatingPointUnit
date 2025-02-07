@@ -5,27 +5,24 @@ module fpu_mul_RTL(
         input  logic [31:0]   din2,
         input  logic          valid,
         output logic [31:0]   result,
-        output logic          ready
-);
+        output logic          ready);
 
-  reg       s_output_z_stb;
-  reg       [31:0] s_output_z;
-  reg       s_input_a_ack;
-  reg       s_input_b_ack;
 
-  reg       [3:0] state;
-  parameter WAIT_REQ      = 4'd0,
+
+  typedef enum logic [3:0]{WAIT      = 4'd0,
             UNPACK        = 4'd1,
-            SPECIAL_CASES = 4'd2,
-            NORMALISE_A   = 4'd3,
-            NORMALISE_B   = 4'd4,
-            MULTIPLY_0    = 4'd5,
-            MULTIPLY_1    = 4'd6,
+            CORNER_CASES = 4'd2,
+            NORMALISE_DIN1   = 4'd3,
+            NORMALISE_DIN2   = 4'd4,
+            SIGN_PRODUCT    = 4'd5,
+            SET_GRS    = 4'd6,
             NORMALISE_1   = 4'd7,
             NORMALISE_2   = 4'd8,
             ROUND         = 4'd9,
             PACK          = 4'd10,
-            OUT_RDY       = 4'd11;
+            READY       = 4'd11} states;
+			
+	states state;
 
   reg       [31:0] a, b, z;
   reg       [23:0] a_m, b_m, z_m;
@@ -37,11 +34,11 @@ module fpu_mul_RTL(
   always @(negedge reset or posedge clk)
   begin
     if (reset == 1) begin
-      state         <= WAIT_REQ;
+      state         <= WAIT;
       ready           <= '0;
     end else begin
        case(state)
-         WAIT_REQ:
+         WAIT:
          begin
            ready   <= '0;
            if (valid) begin
@@ -59,10 +56,10 @@ module fpu_mul_RTL(
            b_e <= b[30 : 23] - 127;
            a_s <= a[31];
            b_s <= b[31];
-           state <= SPECIAL_CASES;
+           state <= CORNER_CASES;
          end
 
-         SPECIAL_CASES:
+         CORNER_CASES:
          begin
            //if a is NaN or b is NaN return NaN 
            if ((a_e == 128 && a_m != 0) || (b_e == 128 && b_m != 0)) begin
@@ -70,7 +67,7 @@ module fpu_mul_RTL(
              z[30:23] <= 255;
              z[22] <= 1;
              z[21:0] <= 0;
-             state <= OUT_RDY;
+             state <= READY;
            //if a is inf return inf
            end else if (a_e == 128) begin
              z[31] <= a_s ^ b_s;
@@ -83,7 +80,7 @@ module fpu_mul_RTL(
                z[22] <= 1;
                z[21:0] <= 0;
              end
-             state <= OUT_RDY;
+             state <= READY;
            //if b is inf return inf
            end else if (b_e == 128) begin
              z[31] <= a_s ^ b_s;
@@ -96,19 +93,19 @@ module fpu_mul_RTL(
                z[22] <= 1;
                z[21:0] <= 0;
              end
-             state <= OUT_RDY;
+             state <= READY;
            //if a is zero return zero
            end else if (($signed(a_e) == -127) && (a_m == 0)) begin
              z[31] <= a_s ^ b_s;
              z[30:23] <= 0;
              z[22:0] <= 0;
-             state <= OUT_RDY;
+             state <= READY;
            //if b is zero return zero
            end else if (($signed(b_e) == -127) && (b_m == 0)) begin
              z[31] <= a_s ^ b_s;
              z[30:23] <= 0;
              z[22:0] <= 0;
-             state <= OUT_RDY;
+             state <= READY;
            end else begin
              //Denormalised Number
              if ($signed(a_e) == -127) begin
@@ -122,39 +119,39 @@ module fpu_mul_RTL(
              end else begin
                b_m[23] <= 1;
              end
-             state <= NORMALISE_A;
+             state <= NORMALISE_DIN1;
            end
          end
 
-         NORMALISE_A:
+         NORMALISE_DIN1:
          begin
            if (a_m[23]) begin
-             state <= NORMALISE_B;
+             state <= NORMALISE_DIN2;
            end else begin
              a_m <= a_m << 1;
              a_e <= a_e - 1;
            end
          end
 
-         NORMALISE_B:
+         NORMALISE_DIN2:
          begin
            if (b_m[23]) begin
-             state <= MULTIPLY_0;
+             state <= SIGN_PRODUCT;
            end else begin
              b_m <= b_m << 1;
              b_e <= b_e - 1;
            end
          end
 
-         MULTIPLY_0:
+         SIGN_PRODUCT:
          begin
            z_s <= a_s ^ b_s;
            z_e <= a_e + b_e + 1;
            product <= a_m * b_m;
-           state <= MULTIPLY_1;
+           state <= SET_GRS;
          end
 
-         MULTIPLY_1:
+         SET_GRS:
          begin
            z_m <= product[47:24];
            guard <= product[23];
@@ -214,14 +211,14 @@ module fpu_mul_RTL(
              z[30 : 23] <= 255;
              z[31] <= z_s;
            end
-           state <= OUT_RDY;
+           state <= READY;
          end
 
-         OUT_RDY:
+         READY:
          begin
             ready        <= 1;
             result     <= z;
-            state      <= WAIT_REQ;
+            state      <= WAIT;
          end
 
        endcase
