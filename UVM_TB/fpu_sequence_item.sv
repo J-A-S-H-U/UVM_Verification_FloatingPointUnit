@@ -23,13 +23,8 @@ class fpu_sequence_item extends uvm_sequence_item;
   }
 
   constraint din1_range{
-    if(!(cmd==4'b0101)) {
-      din1[30:23]!=8'd255;
-      din1[30:23]!=8'd0;
-    }
-    else{
       din1>=32'd0;
-    }
+   
   }
 
   constraint din2_range{
