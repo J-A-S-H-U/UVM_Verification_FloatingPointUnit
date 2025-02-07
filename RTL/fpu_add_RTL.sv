@@ -10,18 +10,6 @@ module fpu_add_RTL(
 
   reg       [31:0] s_output_z;
 
-  /*reg       [3:0] state;
-  parameter WAIT      = 4'd0,
-            UNPACK        = 4'd1,
-            CORNER_CASES = 4'd2,
-            DENORM         = 4'd3,
-            ADD         = 4'd4,
-            SET_GRS         = 4'd5,
-            NORMALISE_1   = 4'd6,
-            NORMALISE_2   = 4'd7,
-            ROUND         = 4'd8,
-            PACK          = 4'd9,
-            READY       = 4'd10;*/
   typedef enum logic [3:0]{WAIT      = 4'd0,
             UNPACK        = 4'd1,
             CORNER_CASES = 4'd2,
@@ -42,7 +30,7 @@ module fpu_add_RTL(
   reg       [23:0] z_m;
   reg       [9:0] a_e, b_e, z_e;
   reg       a_s, b_s, z_s;
-  reg       guard, round_bit, sticky;
+  reg       guard, round_bit, sticky;    //for rounding
   reg       [27:0] pre_sum;
 
   always @(negedge reset or posedge clk)
