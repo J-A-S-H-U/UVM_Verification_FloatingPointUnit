@@ -16,13 +16,13 @@ class fpu_scoreboard extends uvm_scoreboard;
   
   function new(string name = "fpu_scoreboard", uvm_component parent);
     super.new(name, parent);
-    `uvm_info("SCB_CLASS", "Inside Constructor!", UVM_HIGH)
+    `uvm_info("SCOREBOARD", "Inside Constructor!", UVM_HIGH)
   endfunction: new
   
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    `uvm_info("SCB_CLASS", "Build Phase!", UVM_HIGH)
+    `uvm_info("SCOREBOARD", "Build Phase!", UVM_HIGH)
     scb_port=new("scb_port",this);
 
   endfunction: build_phase
@@ -30,7 +30,7 @@ class fpu_scoreboard extends uvm_scoreboard;
   
   function void connect_phase(uvm_phase phase);
     super.connect_phase(phase);
-    `uvm_info("SCB_CLASS", "Connect Phase!", UVM_HIGH)
+    `uvm_info("SCOREBOARD", "Connect Phase!", UVM_HIGH)
    
   endfunction: connect_phase
   
