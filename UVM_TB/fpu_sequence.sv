@@ -10,7 +10,7 @@ class fpu_base_sequence extends uvm_sequence;
 
 endclass: fpu_base_sequence
 
-//RESET SEQUENCE
+
 class fpu_rst_seq extends fpu_base_sequence;
 
   `uvm_object_utils(fpu_rst_seq)
@@ -31,7 +31,7 @@ class fpu_rst_seq extends fpu_base_sequence;
   endtask
 endclass
 
-//MAIN SEQUENCE
+
 class fpu_main_seq extends fpu_base_sequence;
 
   `uvm_object_utils(fpu_main_seq)
