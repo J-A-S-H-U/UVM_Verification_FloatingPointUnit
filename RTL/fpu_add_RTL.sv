@@ -30,7 +30,7 @@ module fpu_add_RTL(
   reg       [23:0] z_m;
   reg       [9:0] a_e, b_e, z_e;
   reg       a_s, b_s, z_s;
-  reg       guard, round_bit, sticky;    //for rounding
+  reg       guard, round_bit, sticky;
   reg       [27:0] pre_sum;
 
   always @(negedge reset or posedge clk)
@@ -95,12 +95,6 @@ module fpu_add_RTL(
               z[30:23] <= b_e[7:0] + 127;
               z[22:0] <= b_m[26:3];
               state <= READY;
-            //if a is zero return b
-           /* end else if (($signed(a_e) == -127) && (a_m == 0)) begin
-              z[31] <= b_s;
-              z[30:23] <= b_e[7:0] + 127;
-              z[22:0] <= b_m[26:3];
-              state <= READY;*/
             
             end else if (($signed(b_e) == -127) && (b_m == 0)) begin												//if b is zero return a
               z[31] <= a_s;
@@ -220,7 +214,7 @@ module fpu_add_RTL(
               z[30 : 23] <= 0;
             end
             if ($signed(z_e) == -126 && z_m[23:0] == 24'h0) begin
-              z[31] <= 1'b0; // FIX SIGN BUG: -a + a = +0.
+              z[31] <= 1'b0; 
             end
             //if overflow occurs, return inf
             if ($signed(z_e) > 127) begin
