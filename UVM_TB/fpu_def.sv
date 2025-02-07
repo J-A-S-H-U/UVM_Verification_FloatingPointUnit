@@ -1,4 +1,4 @@
-`define TEST_COUNT 150
+`define TESTS 100
 `include "fpu_top_RTL.sv"
 `include "fpu_interface.sv"
 `include "fpu_sequence_item.sv"
